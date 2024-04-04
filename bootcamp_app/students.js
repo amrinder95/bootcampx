@@ -9,15 +9,16 @@ const pool = new Pool({ //setup connection to database
 
 const args = process.argv.slice(2); //retrieve arguments from command line
 
-pool.query(
-  ` SELECT students.id, students.name AS name, cohorts.name AS cohort
-    FROM students
-    JOIN cohorts ON cohort_id = cohorts.id
-    WHERE cohorts.name LIKE '%${args[0]}%'
-    ORDER BY students.id
-    LIMIT ${args[1]};
-    `
-  )
+const queryString = `    
+  SELECT students.id, students.name AS name, cohorts.name AS cohort
+  FROM students
+  JOIN cohorts ON cohort_id = cohorts.id
+  WHERE cohorts.name LIKE $1
+  LIMIT $2
+  `;
+
+
+pool.query(queryString, [`%${args[0]}%`, args[1]])
   .then((res) => {
     res.rows.forEach((user) => {
       console.log(`${user.name} has an id of ${user.id} and was in the ${user.cohort} cohort`)
